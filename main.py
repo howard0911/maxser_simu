@@ -6,6 +6,8 @@ from sklearn.metrics import mean_squared_error
 import yfinance as yf 
 from datetime import datetime
 import matplotlib.pyplot as plt
+import scipy.special as sc
+import csv
 
 from data_gene import GBMsimulator
 from monte_carlo import mc_simu
@@ -39,18 +41,9 @@ if __name__ == '__main__':
     #price = price_extract()
 
     #3. Calculate Daily Returns, and Expected Mean Return & Covariance
-    #meanReturns, covMatrix = mean_cov()
-    # Trivial Example: Define historical returns of the six stocks
-    returns = pd.DataFrame({
-        'AAPL': [0.01, 0.02, -0.03, 0.04, 0.01, -0.02],
-        'GOOG': [0.02, 0.03, -0.1, 0.05, 0.03, -0.01],
-        'AMZN': [0.03, 0.01, -0.01, 0.04, 0.02, -0.03],
-        'FB': [0.02, 0.03, -0.01, 0.06, 0.04, -0.02],
-        'NFLX': [0.04, 0.05, -0.02, 0.08, 0.02, -0.01],
-        'MSFT': [0.01, 0.03, -0.01, 0.05, 0.02, -0.01]
-    })
-    meanReturns = calculate_assets_expectedreturns(returns)
-    covMatrix = calculate_assets_covariance(returns)
+    # meanReturns, covMatrix = mean_cov()
+    #meanReturns = calculate_assets_expectedreturns(returns)
+    #covMatrix = calculate_assets_covariance(returns)
  
     #4. Use Monte Carlo Simulation
     # Generate portfolios with allocations
@@ -67,7 +60,7 @@ if __name__ == '__main__':
     #7. estimate the square of maximum sharpe ratio theta_hat 2.32
     temp = np.dot(np.transpose(np.array(meanReturns)), np.linalg.inv(np.array(covMatrix)))
     theta_s = np.dot(temp, np.array(meanReturns))
-    theta_adj_hat = ((T-N-2)*theta_s-N)/T  #+ (2*theta_s**(N/2)*(1+theta_s)**(-(T-2)/2))/(T*B)
+    theta_adj_hat = ((T-N-2)*theta_s-N)/T + (2*theta_s**(N/2)*(1+theta_s)**(-(T-2)/2))/(T*sc.betainc(N/2,(T-N)/2, x=theta_s/(1+theta_s)))
 
     #8. compute r_c
     r_c = sigma*(1+theta_adj_hat)/np.sqrt(theta_adj_hat)
