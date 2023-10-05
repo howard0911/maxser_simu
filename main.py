@@ -31,7 +31,7 @@ if __name__ == '__main__':
     T = 120 # sample size
     replica = 1000 # replication times
     # theoratical maximum SR = 1.882
-    N = 50 # num of stocks
+    N = 100 # num of stocks
     n_stocks_available = 500
 
     #1. Get companies
@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     #3. Calculate Daily Returns, and Expected Mean Return & Covariance
     # meanReturns, covMatrix = mean_cov()
-    #meanReturns = calculate_assets_expectedreturns(returns)
-    #covMatrix = calculate_assets_covariance(returns)
+    meanReturns = calculate_assets_expectedreturns(returns)
+    covMatrix = calculate_assets_covariance(returns)
  
     #4. Use Monte Carlo Simulation
     # Generate portfolios with allocations
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     #10. solve w_hat for MAXSER
 
-
+    
 
     
 

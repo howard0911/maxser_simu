@@ -5,71 +5,41 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import yfinance as yf 
 from datetime import datetime
-import matplotlib.pyplot as plt
-import scipy.special as sc
+#import matplotlib.pyplot as plt
+#import scipy.special as sc
 import csv
-
-
 
 from data_gene import GBMsimulator
 from monte_carlo import mc_simu
 from price_extractor import select_stock, price_extract, mean_cov  
 from calculator import calculate_assets_expectedreturns, calculate_assets_covariance
 
-## implementation steps(scenario 1)
-# 1. conduct subpool (option)
-# 2. estimate the square of maximum sharpe ratio by theta_hat in 2.32, and compute the response r_c_hat in 2.10
-# 3. select lambda through CV according to 2.5.2, demoted by lambda_hat
-# 4. set lambda in 2.12 to be lambda_hat and solve for the MAAXSER portfolio omega_hat_star in 2.12
-# compare with benchmark portfolio 
+start_date = "2007-01-01"
+end_date = "2016-12-31"
+
+sp500_tickers = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'FB', 'TSLA', 'JPM', 'JNJ', 'V', 'PG',
+                 'MA', 'NVDA', 'UNH', 'HD', 'VZ', 'DIS', 'PYPL', 'CMCSA', 'BAC', 'CSCO',
+                 'INTC', 'T', 'PFE', 'ORCL', 'KO', 'MRK', 'XOM', 'NFLX', 'WMT', 'MCD',
+                 'BA', 'TMO', 'CAT', 'ADBE', 'ABBV', 'NKE', 'CRM', 'PEP', 'GS', 'CVX',
+                 'PM', 'UPS', 'COST', 'C', 'ABT', 'WFC', 'ACN', 'QCOM', 'AMGN', 'TXN',
+                 'NEE', 'DHR', 'SO', 'ADP', 'HON', 'TMO', 'LMT', 'RTX', 'MO', 'MDT',
+                 'AMAT', 'CME', 'GD', 'BKNG', 'CSX', 'BIIB', 'COF', 'CVS', 'STZ', 'AXP',
+                 'GM', 'LRCX', 'MU', 'MMM', 'USB', 'FDX', 'ISRG', 'CCI', 'EQIX', 'CSX',
+                 'SO', 'ADP', 'HON', 'TMO', 'LMT', 'RTX', 'MO', 'MDT', 'AMAT', 'CME',
+                 'GD', 'BKNG', 'CSX', 'BIIB', 'COF', 'CVS', 'STZ', 'AXP', 'GM', 'LRCX']
+
+stock_data = {}  # Create a dictionary to store data for each stock
+
+for ticker in sp500_tickers:
+    stock_data[ticker] = yf.download(ticker, start=start_date, end=end_date)
+
+# Calculate daily returns for each stock
+for ticker, data in stock_data.items():
+    data['Daily_Return'] = data['Adj Close'].pct_change()
 
 
+# Calculate Daily Returns, and Expected Mean Return & Covariance
+meanReturns = calculate_assets_expectedreturns(data['Daily_Return'])
+covMatrix = calculate_assets_covariance(data['Daily_Return'])
 
-
-# Parameters settings
-sigma = 0.04 # variance constraint
-T = 120 # sample size
-replica = 1000 # replication times
-# theoratical maximum SR = 1.882
-N = 50 # num of stocks
-n_stocks_available = 500
-
-
-#3. Calculate Daily Returns, and Expected Mean Return & Covariance
-
-with open("./archive/individual_stocks_5yr.csv/individual_stocks_5yr/AAL_data.csv", 'r') as file:
-  csvreader = csv.reader(file)
-  for row in csvreader:
-    print(row)
-
-# meanReturns, covMatrix = mean_cov()
-#meanReturns = calculate_assets_expectedreturns(returns)
-#covMatrix = calculate_assets_covariance(returns)
-
-#4. Use Monte Carlo Simulation
-# Generate portfolios with allocations
-# num of simulations
-mc_sims = 100
-#T = 100 # timeframe in days
-initialPortfolio = 10000
-portfolios_allocations_df = mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio)
-meanReturns = calculate_assets_expectedreturns(portfolios_allocations_df)        
-covMatrix = calculate_assets_covariance(portfolios_allocations_df)
-
-#6. conduct subpool(optional)
-
-#7. estimate the square of maximum sharpe ratio theta_hat 2.32
-temp = np.dot(np.transpose(np.array(meanReturns)), np.linalg.inv(np.array(covMatrix)))
-theta_s = np.dot(temp, np.array(meanReturns))
-theta_adj_hat = ((T-N-2)*theta_s-N)/T + (2*theta_s**(N/2)*(1+theta_s)**(-(T-2)/2))/(T*sc.betainc(N/2,(T-N)/2, x=theta_s/(1+theta_s)))
-
-#8. compute r_c
-r_c = sigma*(1+theta_adj_hat)/np.sqrt(theta_adj_hat)
-
-#9. CV for select lambda_hat
-
-print(r_c)
-
-#10. solve w_hat for MAXSER
-
-
+print(meanReturns, covMatrix)

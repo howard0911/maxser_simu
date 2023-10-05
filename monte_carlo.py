@@ -23,7 +23,7 @@ startDate = endDate - dt.timedelta(days=300)
 meanReturns, covMatrix = get_data(stocks, startDate, endDate)
 # num of simulations
 mc_sims = 100
-T = 100 # tiemframe in days
+T = 100 # timeframe in days
 initialPortfolio = 10000
 
 def mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio):
@@ -45,10 +45,10 @@ def mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio):
     portfolio_sims = pd.DataFrame(portfolio_sims)
     return portfolio_sims
 
-#print(mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio))
-#plt.plot(mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio))
-#plt.ylabel('Portfolio Value ($)')
-#plt.xlabel('Days')
-#plt.title('MC simulations of a stock portfolio')
-#plt.show()
+print(mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio))
+plt.plot(mc_simu(meanReturns, covMatrix, mc_sims, T, initialPortfolio))
+plt.ylabel('Portfolio Value ($)')
+plt.xlabel('Days')
+plt.title('MC simulations of a stock portfolio')
+plt.show()
 
